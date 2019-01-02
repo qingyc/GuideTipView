@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 
+
 /**
  *
  * 类说明:
@@ -41,6 +42,14 @@ class GuideTipViewBuild(context: Context, targetView: View) {
         mGuideTipView.mGuideTv.text = tipMsg
         mGuideTipView.mGuideTvDiffX = guideTvDiffX
         mGuideTipView.mGuideTvDiffY = guideTvDiffY
+        return this
+    }
+
+    /**
+     * 添加自定义布局
+     */
+    fun setGuideCustomLayoutAndLocation(guideTvDiffX: Int, guideTvDiffY: Int, customLayout: View): GuideTipViewBuild {
+        mGuideTipView.setCustomGuideLayout(guideTvDiffX, guideTvDiffY, customLayout)
         return this
     }
 
@@ -129,6 +138,14 @@ class GuideTipViewBuild(context: Context, targetView: View) {
      */
     fun setOnDismissListener(dismissListener: DismissListener): GuideTipViewBuild {
         mGuideTipView.mDismissListener = dismissListener
+        return this
+    }
+
+    /**
+     * 设置
+     */
+    fun setAutoRadius(autoRadius: Boolean = false): GuideTipViewBuild {
+        mGuideTipView.mAutoRadius = autoRadius
         return this
     }
 
