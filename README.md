@@ -8,12 +8,30 @@ Screenshots
 ![demo](https://github.com/qingyc/GuideTipView/blob/master/sample/art/QQ20180706-170859.gif)
 #### use in viewGroup
 ![demo](https://github.com/qingyc/GuideTipView/blob/master/sample/art/QQ20180706-171010.gif)
+#### use customLayout
+![demo](https://github.com/qingyc/GuideTipView/blob/master/sample/art/WX20190102-181553@2x.png)
+![demo](https://github.com/qingyc/GuideTipView/blob/master/sample/art/QQ20190102-174709.gif)
 
 Usage
 ----
 
 look here
 https://www.jianshu.com/p/3206092a5751
+
+# How To Use
+Add it in your root build.gradle at the end of repositories:
+
+	allprojects {
+		repositories {
+			...
+			maven { url 'https://jitpack.io' }
+		}
+	}
+Step 2. Add the dependency
+
+	dependencies {
+	        implementation 'com.github.qingyc:GuideTipView:Tag'
+	}
 
 simple use 
 ```
