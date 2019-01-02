@@ -221,9 +221,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     }
 
 
-    /**
-     * 点击整个卡片，查看详细使用情况
-     */
+
     private fun showCustomLayoutGuide(targetView: View) {
 
         val alphaAnimation = AlphaAnimation(.5F, 1F)

@@ -9,7 +9,7 @@ Screenshots
 #### use in viewGroup
 ![demo](https://github.com/qingyc/GuideTipView/blob/master/sample/art/QQ20180706-171010.gif)
 #### use customLayout
-![demo](https://github.com/qingyc/GuideTipView/blob/master/sample/art/WX20190102-181553@2x.png)
+![demo](https://github.com/qingyc/GuideTipView/blob/master/sample/art/WX20190102-182721.png)
 ![demo](https://github.com/qingyc/GuideTipView/blob/master/sample/art/QQ20190102-174709.gif)
 
 Usage
@@ -30,9 +30,10 @@ Add it in your root build.gradle at the end of repositories:
 Step 2. Add the dependency
 
 	dependencies {
-	        implementation 'com.github.qingyc:GuideTipView:Tag'
+	          implementation 'com.github.qingyc:GuideTipView:0.2'
 	}
 
+简单使用
 simple use 
 ```
  GuideTipViewBuild(context, targetIv)
@@ -40,6 +41,7 @@ simple use
    .build()
    .show()
 ```
+定制
 Customization
 ```
  // customer guide textView
@@ -83,6 +85,43 @@ Customization
                         //show
                         .build().show()
 ```
+ 使用自定义布局
+ use customLayout 
+ 
+ 
+    private fun showCustomLayoutGuide(targetView: View) {
+
+        val alphaAnimation = AlphaAnimation(.5F, 1F)
+        alphaAnimation.duration = 600
+        alphaAnimation.repeatMode = Animation.REVERSE
+        alphaAnimation.repeatCount = Animation.INFINITE
+        alphaAnimation.interpolator = AccelerateInterpolator()
+        //点击整个卡片，查看详细使用情况
+        val guideCustomLayoutForClickItem = LayoutInflater.from(this).inflate(R.layout.guide_usage_click, null, false)
+        val guideTipView = GuideTipViewBuild(this, targetView)
+                .setClickDismissType(GuideTipView.ClickDismissType.AUTO_DISMISS)
+                .setGuideCustomLayoutAndLocation(ScreenUtil.dp2px(this, -5), ScreenUtil.dp2px(this, 45), guideCustomLayoutForClickItem)
+                .openDebug(true)
+                .setTypeCircle(false)
+                .setShowDashPath(false)
+                .setBgAlpha(100)
+                .setAutoRadius(true)
+                //dismiss listener
+                .setOnDismissListener(object : DismissListener {
+                    override fun onDismiss(clickDismissType: GuideTipView.ClickDismissType) {
+
+                    }
+                })
+                .setAutoDismiss(false)
+                //show
+                .build()
+
+        guideTipView.show()
+        guideCustomLayoutForClickItem.iv_dot.startAnimation(alphaAnimation)
+        guideCustomLayoutForClickItem.btn_got_it.setOnClickListener {
+            guideTipView.dismiss()
+        }
+    }
 
 # Thanks
 
