@@ -31,19 +31,10 @@ import android.widget.TextView
  */
 class GuideTipView(private val mContext: Context, private val targetView: View) : RelativeLayout(mContext) {
 
-    /**
-     * : test 用设置引导是否只显示一次  mIsDebug 显示多次 ; 默认false只显示一次
-     */
-    var mIsDebug = false
-    //高亮控件的中心点(相对外层容器 不一定是屏幕)
-    private var mHighlightAreaCenterPoint = Point()
-    //高亮的半径
-    private var mHighlightAreaRadius = 0
     // 屏幕尺寸
     private var mScreenWidth: Int = 0
     private var mScreenHeight: Int = 0
-    //半透明背景颜色
-    private var bgColor: Int = Color.parseColor("#66000000")
+
     //================= 指引图片 =============
     //指引图片
     private var mGuideIv = ImageView(context)
@@ -52,28 +43,56 @@ class GuideTipView(private val mContext: Context, private val targetView: View) 
     var mGuideIvDiffX = 0
     //引导图片的资源
     var mGuideIvRes: Int = 0
+    //引导图片的动画
+    var mGuideIvAnimator: Animator? = null
+
     //================= 指引文字 =============
+    //是否显示指引文字
+    var mShowGuideTv = false
     //指引文字
     var mGuideTv: TextView = LayoutInflater.from(context).inflate(R.layout.tip_text, null, false) as TextView
-    var mCustomGuideLayout: View? = null
     //指引文字和高亮目标距离
     var mGuideTvDiffY = 0
     var mGuideTvDiffX = 0
 
+    //================= 自定义引导布局 =============
+    var mCustomGuideLayout: View? = null
     var mGuideCustomLayoutDiffX = 0
     var mGuideCustomLayoutDiffY = 0
-    //是否显示指引文字
-    var mShowGuideTv = false
-    //被高亮了的背景bitmap
-    private var mBgBitmap: Bitmap? = null
-    //容器画板 用于生成带高亮区域的背景bitmap
-    private var mTempCanvas: Canvas? = null
-    //背景画笔
-    private var mBgPaint: Paint = Paint()
-    private var isMeasured: Boolean = false
+
+
+    //================= 目标高亮区 =============
     //获取的目标控件的位置
     private var mTargetViewLeft: Int = 0
     private var mTargetViewTop: Int = 0
+    //高亮控件的中心点(相对外层容器 不一定是屏幕)
+    private var mHighlightAreaCenterPoint = Point()
+    //高亮的半径
+    private var mHighlightAreaRadius = 0
+    //true:显示圆形高亮区/false:矩形
+    var mHighlightAreaIsCircle = true
+    //高亮区自动到圆角
+    var mHighlightAreaAutoRadius: Boolean = false
+    //是否高亮边缘点划线
+    var mShowDashPath = true
+    //设置高亮区点划线
+    var mDashStrokeWidth = 5f
+    var mDashWidth = 20f
+    var mDashGap = 10f
+    var mDashLineColor = Color.WHITE
+    var mDashOffset = mDashStrokeWidth
+
+    //================= 引导显示位置 =============
+    //蒙版区域(指定不是整个Activity显示引导)
+    var mContainerForGuide: ViewGroup? = null
+    //bg alpha
+    var mBgAlpha = 150
+
+
+    //================= 消失 =============
+    // mIsDebug true:调试时消失后可以再次出现/false: 只出现一次
+    var mIsDebug = false
+    private var isMeasured: Boolean = false
     // 是否已经显示过了
     private var mHasShow: Boolean = false
     //是否自动消失
@@ -81,26 +100,10 @@ class GuideTipView(private val mContext: Context, private val targetView: View) 
     //自动消失时间
     private var mDismissDelayTime: Long = 4000L //默认4秒消失
     //点击消失的类型 
-    var mClickClickDismissType: ClickDismissType = ClickDismissType.DISMISS_IN_HIGH_LIGHT_AREA
-    //蒙版区域(指定不是整个Activity显示引导)
-    var mContainerForGuide: ViewGroup? = null
-    //显示圆形高亮区
-    var mShowCircleGuide = true
-    //是否高亮边缘点划线
-    var mShowDashPath = true
+    var mClickGuideViewDismissType: GuideViewDismissType = GuideViewDismissType.DISMISS_IN_HIGH_LIGHT_AREA
     //消失监听
     var mDismissListener: DismissListener? = null
-    //引导图片的动画
-    var mGuideIvAnimator: Animator? = null
-    var mAutoRadius: Boolean = false
 
-    //设置高亮区点划线
-    var mDashStrokeWidth = 5f
-    var mDashWidth = 20f
-    var mDashGap = 10f
-    var mDashOffset = mDashStrokeWidth
-    //bg alpha
-    var mBgAlpha = 150
 
     // 控件显示状态存储SP的ID
     private var mGuideInInSp = ""
@@ -158,29 +161,12 @@ class GuideTipView(private val mContext: Context, private val targetView: View) 
                     if (BuildConfig.DEBUG) {
                         Log.i("GuideTipView", "DISMISS_GUIDE==== $mGuideInInSp")
                     }
-                    dismiss(ClickDismissType.AUTO_DISMISS)
+                    dismiss(GuideViewDismissType.AUTO_DISMISS)
                 }
             }
         }
     }
 
-
-    /**
-     * 点击哪个区域可以消失
-     */
-    enum class ClickDismissType {
-        //点击高亮消失
-        DISMISS_IN_HIGH_LIGHT_AREA,
-        //点击指引图片消失
-        DISMISS_IN_GUIDE_IV,
-        //点击指引文字消失
-        DISMISS_IN_GUIDE_TV,
-        //点击所有区域消失
-        DISMISS_IN_ALL_AREA,
-        //自动消失
-        AUTO_DISMISS,
-        DISMISS_BY_OTHER
-    }
 
     init {
         this.visibility = View.GONE
@@ -371,9 +357,9 @@ class GuideTipView(private val mContext: Context, private val targetView: View) 
     /**
      * 移除新手引导
      */
-    fun dismiss(clickDismissType: ClickDismissType = ClickDismissType.DISMISS_BY_OTHER) {
+    fun dismiss(guideViewDismissType: GuideViewDismissType = GuideViewDismissType.DISMISS_BY_OTHER) {
         mHandler.removeCallbacksAndMessages(null)
-        mDismissListener?.onDismiss(clickDismissType)
+        mDismissListener?.onDismiss(guideViewDismissType)
         try {
             (parent as ViewGroup).removeView(this)
         } catch (e: Exception) {
@@ -395,13 +381,13 @@ class GuideTipView(private val mContext: Context, private val targetView: View) 
                 //是够在可点击区
                 var inClickArea = true
 
-                when (mClickClickDismissType) {
+                when (mClickGuideViewDismissType) {
                     //点击所有区域消失
-                    ClickDismissType.DISMISS_IN_ALL_AREA -> {
+                    GuideViewDismissType.DISMISS_IN_ALL_AREA -> {
                         inClickArea = true
                     }
                     //店家高亮区消失
-                    ClickDismissType.DISMISS_IN_HIGH_LIGHT_AREA -> {
+                    GuideViewDismissType.DISMISS_IN_HIGH_LIGHT_AREA -> {
                         //判断点击区域是否在高亮区域
                         val inClickAreaWidth = downX < mHighlightAreaCenterPoint.x + targetView.width / 2 && downX > mHighlightAreaCenterPoint.x - targetView.width / 2
                         val inClickAreaHeight = downY < mHighlightAreaCenterPoint.y + targetView.height / 2 && downY > mHighlightAreaCenterPoint.y - targetView.height / 2
@@ -409,7 +395,7 @@ class GuideTipView(private val mContext: Context, private val targetView: View) 
 
                     }
                     //点击图片消失
-                    ClickDismissType.DISMISS_IN_GUIDE_IV -> {
+                    GuideViewDismissType.DISMISS_IN_GUIDE_IV -> {
                         //判断是否点击引导图片
                         val inClickAreaWidth = downX < mGuideIv.right && downX > mGuideIv.left
                         val inClickAreaHeight = downY < mGuideIv.bottom && downY > mGuideIv.top
@@ -417,11 +403,15 @@ class GuideTipView(private val mContext: Context, private val targetView: View) 
 
                     }
                     //点击文字消失
-                    ClickDismissType.DISMISS_IN_GUIDE_TV -> {
+                    GuideViewDismissType.DISMISS_IN_GUIDE_TV -> {
                         //判断是否点击引导文字
                         val inClickAreaWidth = downX < mGuideTv.right && downX > mGuideTv.left
                         val inClickAreaHeight = downY < mGuideTv.bottom && downY > mGuideTv.top
                         inClickArea = inClickAreaWidth && inClickAreaHeight
+                    }
+                    //点击其他(比如自定义引导布局)
+                    GuideViewDismissType.DISMISS_BY_OTHER -> {
+                        inClickArea = false
                     }
                     //DISMISS_FORBID_CLICK
                     else -> {
@@ -430,7 +420,7 @@ class GuideTipView(private val mContext: Context, private val targetView: View) 
                 }
 
                 if (inClickArea) {
-                    dismiss(mClickClickDismissType)
+                    dismiss(mClickGuideViewDismissType)
                 }
 
             }
@@ -439,9 +429,6 @@ class GuideTipView(private val mContext: Context, private val targetView: View) 
     }
 
 
-    /**
-     * 绘制
-     */
     @SuppressLint("DrawAllocation")
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
@@ -451,67 +438,66 @@ class GuideTipView(private val mContext: Context, private val targetView: View) 
         }
         //1 绘制半透明背景
         // 设置透明背景
-        //if (mBgBitmap == null) {
-        mBgBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-        mTempCanvas = Canvas(mBgBitmap)
-        // }
-        mBgPaint.color = Color.parseColor("#000000")
-        // mBgPaint.color = bgColor
-        mBgPaint.alpha = mBgAlpha
-        mTempCanvas!!.drawRect(0f, 0f, width.toFloat(), height.toFloat(), mBgPaint)
+        val guideTipBgBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val guideTipTempCanvas = Canvas(guideTipBgBitmap)
+        //画笔:设置背景蒙版和高亮区
+        val guideTipPaint = Paint()
+        //背景蒙版是黑色
+        guideTipPaint.color = Color.parseColor("#000000")
+        //给黑色蒙版添加一个透明度
+        guideTipPaint.alpha = mBgAlpha
+        guideTipTempCanvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), guideTipPaint)
 
-
-        //2.绘制高亮区 // QTIP: 2018/5/28 从temp 上去掉了高亮
-        mBgPaint.reset()
-        val transparentPaint = Paint()
-        transparentPaint.color = ContextCompat.getColor(mContext, android.R.color.transparent)
-        transparentPaint.isAntiAlias = true
-        transparentPaint.xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR)
+        //2.绘制高亮区 ->从temp 上去掉了高亮区域
+        guideTipPaint.reset()
+        guideTipPaint.color = ContextCompat.getColor(mContext, android.R.color.holo_red_dark)
+        guideTipPaint.isAntiAlias = true
+        guideTipPaint.xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR)
         //高亮目标控件的中心位置
         val centerX = mHighlightAreaCenterPoint.x
         val centerY = mHighlightAreaCenterPoint.y
-        val cornerRadius: Float = if (mAutoRadius) minOf(targetView.width / 2, targetView.height / 2).toFloat() else 15.0f
+        val cornerRadius: Float = if (mHighlightAreaAutoRadius) minOf(targetView.width / 2, targetView.height / 2).toFloat() else 15.0f
         //2.1显示圆形高亮
-        if (mShowCircleGuide) {
-            mTempCanvas!!.drawCircle(centerX.toFloat(), centerY.toFloat(), maxOf(targetView.height / 2, targetView.width / 2).toFloat() + 10, transparentPaint)
-            canvas.drawBitmap(mBgBitmap, 0f, 0f, mBgPaint)
+        if (mHighlightAreaIsCircle) {
+            guideTipTempCanvas.drawCircle(centerX.toFloat(), centerY.toFloat(), maxOf(targetView.height / 2, targetView.width / 2).toFloat() + 10, guideTipPaint)
+            guideTipPaint.reset()
+            canvas.drawBitmap(guideTipBgBitmap, 0f, 0f, guideTipPaint)
         }
         //2.2显示矩形高亮
         else {
             //当控件尺寸小于2*150时 调整高亮区 避免高亮区太小
             if (mHighlightAreaRadius < 150) {
                 val rect = RectF((centerX - mHighlightAreaRadius).toFloat(), (centerY - targetView.height / 2).toFloat(), (centerX + mHighlightAreaRadius).toFloat(), (centerY + targetView.height / 2).toFloat())
-                mTempCanvas!!.drawRoundRect(rect, cornerRadius, cornerRadius, transparentPaint)
+                guideTipTempCanvas.drawRoundRect(rect, cornerRadius, cornerRadius, guideTipPaint)
             } else {
                 val rect = RectF((centerX - mHighlightAreaRadius + 8).toFloat(), (centerY - targetView.height / 2 + 5).toFloat(), (centerX + mHighlightAreaRadius - 8).toFloat(), (centerY + targetView.height / 2 - 5).toFloat())
-                mTempCanvas!!.drawRoundRect(rect, cornerRadius, cornerRadius, transparentPaint)
-
+                guideTipTempCanvas.drawRoundRect(rect, cornerRadius, cornerRadius, guideTipPaint)
             }
-            canvas.drawBitmap(mBgBitmap, 0f, 0f, mBgPaint)
+            guideTipPaint.reset()
+            canvas.drawBitmap(guideTipBgBitmap, 0f, 0f, guideTipPaint)
         }
 
-        //绘制高亮区域外边的点画线
+        //3.绘制高亮区域外边的点画线
         if (mShowDashPath) {
             //设置点划线画笔
-            val p = Paint(Paint.ANTI_ALIAS_FLAG)
-            p.style = Paint.Style.STROKE
-            p.color = Color.WHITE
-            p.strokeWidth = mDashStrokeWidth
+            guideTipPaint.reset()
+            guideTipPaint.style = Paint.Style.STROKE
+            guideTipPaint.color = Color.WHITE
+            guideTipPaint.strokeWidth = mDashStrokeWidth
             val effects = DashPathEffect(floatArrayOf(mDashWidth, mDashGap), 1f)
-            p.pathEffect = effects
-
-            if (mShowCircleGuide) {
-                canvas.drawCircle(centerX.toFloat(), centerY.toFloat(), maxOf(targetView.height / 2, targetView.width / 2).toFloat() + 10 + mDashOffset, p)
+            guideTipPaint.pathEffect = effects
+            if (mHighlightAreaIsCircle) {
+                canvas.drawCircle(centerX.toFloat(), centerY.toFloat(), maxOf(targetView.height / 2, targetView.width / 2).toFloat() + 10 + mDashOffset, guideTipPaint)
             } else {
                 //当控件小于2*150时
                 if (mHighlightAreaRadius < 150) {
                     val rect2 = RectF((centerX - mHighlightAreaRadius - 4).toFloat(), (centerY - targetView.height / 2 - 4).toFloat(), (centerX + mHighlightAreaRadius + 4).toFloat(), (centerY + targetView.height / 2 + 4).toFloat())
-                    canvas.drawRoundRect(rect2, cornerRadius, cornerRadius, p) //画空心圆角矩形
+                    canvas.drawRoundRect(rect2, cornerRadius, cornerRadius, guideTipPaint) //画空心圆角矩形
                 }
                 //当控件大于2*150时
                 else {
                     val rect2 = RectF((centerX - mHighlightAreaRadius + 3).toFloat(), (centerY - targetView.height / 2).toFloat(), (centerX + mHighlightAreaRadius - 3).toFloat(), (centerY + targetView.height / 2).toFloat())
-                    canvas.drawRoundRect(rect2, cornerRadius, cornerRadius, p)
+                    canvas.drawRoundRect(rect2, cornerRadius, cornerRadius, guideTipPaint)
                 }
             }
         }

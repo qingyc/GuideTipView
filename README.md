@@ -30,7 +30,7 @@ Add it in your root build.gradle at the end of repositories:
 Step 2. Add the dependency
 
 	dependencies {
-	          implementation 'com.github.qingyc:GuideTipView:0.3'
+	          implementation 'com.github.qingyc:GuideTipView:0.4'
 	}
 
 简单使用
@@ -76,8 +76,8 @@ Customization
                         .setBgAlpha(200)
                         //dismiss listener
                         .setOnDismissListener(object : DismissListener {
-                            override fun onDismiss(clickDismissType: GuideTipView.ClickDismissType) {
-                                Toast.makeText(this@MainActivity, "clickDismissType = $clickDismissType", Toast.LENGTH_SHORT).show()
+                            override fun onDismiss(guideViewDismissType: GuideTipView.ClickDismissType) {
+                                Toast.makeText(this@MainActivity, "guideViewDismissType = $guideViewDismissType", Toast.LENGTH_SHORT).show()
                             }
                         })
                         //forbid auto dismiss
@@ -96,7 +96,7 @@ Customization
         alphaAnimation.repeatMode = Animation.REVERSE
         alphaAnimation.repeatCount = Animation.INFINITE
         alphaAnimation.interpolator = AccelerateInterpolator()
-        //点击整个卡片，查看详细使用情况
+        
         val guideCustomLayoutForClickItem = LayoutInflater.from(this).inflate(R.layout.guide_usage_click, null, false)
         val guideTipView = GuideTipViewBuild(this, targetView)
                 .setClickDismissType(GuideTipView.ClickDismissType.AUTO_DISMISS)
@@ -108,7 +108,7 @@ Customization
                 .setAutoRadius(true)
                 //dismiss listener
                 .setOnDismissListener(object : DismissListener {
-                    override fun onDismiss(clickDismissType: GuideTipView.ClickDismissType) {
+                    override fun onDismiss(guideViewDismissType: GuideTipView.ClickDismissType) {
 
                     }
                 })

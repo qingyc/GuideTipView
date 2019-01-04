@@ -8,5 +8,5 @@ package com.qing.guidetipview
  * @time 2018/7/6 09:41
  */
 interface DismissListener {
-    fun onDismiss(clickDismissType: GuideTipView.ClickDismissType)
+    fun onDismiss(guideViewDismissType: GuideViewDismissType)
 }
