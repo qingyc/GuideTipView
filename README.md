@@ -30,13 +30,13 @@ Add it in your root build.gradle at the end of repositories:
 Step 2. Add the dependency
 
 	dependencies {
-	          implementation 'com.github.qingyc:GuideTipView:0.4'
+	          implementation 'com.github.qingyc:GuideTipView:0.5'
 	}
 
 简单使用
 simple use 
 ```
- GuideTipViewBuild(context, targetIv)
+GuideTipViewBuild(context, targetIv)
    .setGuideIvResAndLocation(R.drawable.guide_iv, locationX, locationY)
    .build()
    .show()
@@ -44,85 +44,82 @@ simple use
 定制
 Customization
 ```
- // customer guide textView
+// customer guide textView
  
-                val textView = TextView(this)
-                textView.setTextColor(Color.WHITE)
-                textView.textSize = 18f
-                textView.setBackgroundResource(R.drawable.bg_tv)
+al textView = TextView(this)
+extView.setTextColor(Color.WHITE)
+extView.textSize = 18f
+extView.setBackgroundResource(R.drawable.bg_tv)
 
-                //set animation in guideIV
-                val loadAnimator = AnimatorInflater.loadAnimator(this, R.animator.guide_up_down)
-                GuideTipViewBuild(this, iv_share5)
-                        //set image res and set location 
-                        .setGuideIvResAndLocation(R.drawable.img_click, ScreenUtil.dp2px(this, 18), ScreenUtil.dp2px(this, 40))
-                        //set des text and set location
-                        .setGuideIvMsgAndLocation("click here dismiss.. ", -ScreenUtil.dp2px(this, 140), ScreenUtil.dp2px(this, 90), textView)
-                        //click textView  to dismiss
-                        .setClickDismissType(GuideTipView.ClickDismissType.DISMISS_IN_GUIDE_TV)
-                        //set a container to show guide
-                        .setContainerForGuide(rl_main)
-                        //open debug
-                        .openDebug(true)
-                        //add animation in guide iv
-                        .setGuideIvAnimator(loadAnimator)
-                        //set highlight area type
-                        .setTypeCircle(false)
-                        //use dash line
-                        .setShowDashPath(false)
-                        //setDashLine
-                        .setDashLine(3f,20f,10f,0f)
-                        //set translucent background alpha value
-                        .setBgAlpha(200)
-                        //dismiss listener
-                        .setOnDismissListener(object : DismissListener {
-                            override fun onDismiss(guideViewDismissType: GuideTipView.ClickDismissType) {
-                                Toast.makeText(this@MainActivity, "guideViewDismissType = $guideViewDismissType", Toast.LENGTH_SHORT).show()
-                            }
-                        })
-                        //forbid auto dismiss
-                        .setAutoDismiss(false)
-                        //show
-                        .build().show()
+/set animation in guideIV
+al loadAnimator = AnimatorInflater.loadAnimator(this, R.animator.guide_up_down)
+uideTipViewBuild(this, iv_share5)
+       //set image res and set location
+       .setGuideIvResAndLocation(R.drawable.img_click, ScreenUtil.dp2px(this, 18), ScreenUtil.dp2px(this, 40))
+       //set des text and set location
+       .setGuideIvMsgAndLocation("click here dismiss.. ", -ScreenUtil.dp2px(this, 140), ScreenUtil.dp2px(this, 90), textView)
+       //click textView  to dismiss
+       .setClickDismissType(GuideTipView.ClickDismissType.DISMISS_IN_GUIDE_TV)
+       //set a container to show guide
+       .setContainerForGuide(rl_main)
+       //open debug
+       .openDebug(true)
+       //add animation in guide iv
+       .setGuideIvAnimator(loadAnimator)
+       //set highlight area type
+       .setTypeCircle(false)
+       //use dash line
+       .setShowDashPath(false)
+       //setDashLine
+       .setDashLine(3f,20f,10f,0f)
+       //set translucent background alpha value
+       .setBgAlpha(200)
+       //dismiss listener
+       .setOnDismissListener(object : DismissListener {
+           override fun onDismiss(guideViewDismissType: GuideTipView.ClickDismissType) {
+               Toast.makeText(this@MainActivity, "guideViewDismissType = $guideViewDismissType", Toast.LENGTH_SHORT).show()
+           }
+       })
+       //forbid auto dismiss
+       .setAutoDismiss(false)
+       //show
+       .build().show()
 ```
  使用自定义布局
  use customLayout 
- 
- 
-    private fun showCustomLayoutGuide(targetView: View) {
+ ```
+ val alphaAnimation = AlphaAnimation(.5F, 1F)
+ alphaAnimation.duration = 600
+ alphaAnimation.repeatMode = Animation.REVERSE
+ alphaAnimation.repeatCount = Animation.INFINITE
+ alphaAnimation.interpolator = AccelerateInterpolator()
+ val guideCustomLayoutForClickItem = LayoutInflater.from(this).inflate(R.layout.guide_usage_click, null, false)
+ val guideTipView = GuideTipViewBuild(this, targetView)
+         .setContainerForGuide(rl_main)
+         .setClickDismissType(GuideViewDismissType.AUTO_DISMISS)
+         .setGuideCustomCenterHorizontal(ScreenUtil.dp2px(this, 45), guideCustomLayoutForClickItem)
+         .openDebug(true)
+         .setHighlightAreaIsCircle(false)
+         .setShowDashPath(true)
+         .setShowDashPathOffset(ScreenUtil.dp2px(this, 4).toFloat())
+         .setBgAlpha(100)
+         .setHighlightAreaAutoRound(false)
+         .setHighlightAreaRadius(ScreenUtil.dp2px(this, 5))
+         .setClickDismissType(GuideViewDismissType.DISMISS_IN_GUIDE_TV)
+         .setOnDismissListener(object : DismissListener {
+             override fun onDismiss(guideViewDismissType: GuideViewDismissType) {
+                 Toast.makeText(this@MainActivity, "clickDismissType = $guideViewDismissType", Toast.LENGTH_SHORT).show()
+             }
+         })
+         .setAutoDismiss(false)
+         .build()
 
-        val alphaAnimation = AlphaAnimation(.5F, 1F)
-        alphaAnimation.duration = 600
-        alphaAnimation.repeatMode = Animation.REVERSE
-        alphaAnimation.repeatCount = Animation.INFINITE
-        alphaAnimation.interpolator = AccelerateInterpolator()
-        
-        val guideCustomLayoutForClickItem = LayoutInflater.from(this).inflate(R.layout.guide_usage_click, null, false)
-        val guideTipView = GuideTipViewBuild(this, targetView)
-                .setClickDismissType(GuideTipView.ClickDismissType.AUTO_DISMISS)
-                .setGuideCustomLayoutAndLocation(ScreenUtil.dp2px(this, -5), ScreenUtil.dp2px(this, 45), guideCustomLayoutForClickItem)
-                .openDebug(true)
-                .setTypeCircle(false)
-                .setShowDashPath(false)
-                .setBgAlpha(100)
-                .setAutoRadius(true)
-                //dismiss listener
-                .setOnDismissListener(object : DismissListener {
-                    override fun onDismiss(guideViewDismissType: GuideTipView.ClickDismissType) {
-
-                    }
-                })
-                .setAutoDismiss(false)
-                //show
-                .build()
-
-        guideTipView.show()
-        guideCustomLayoutForClickItem.iv_dot.startAnimation(alphaAnimation)
-        guideCustomLayoutForClickItem.btn_got_it.setOnClickListener {
-            guideTipView.dismiss()
-        }
-    }
-
+ guideTipView.show()
+ guideCustomLayoutForClickItem.iv_dot.startAnimation(alphaAnimation)
+ guideCustomLayoutForClickItem.btn_got_it.setOnClickListener {
+     guideTipView.dismiss()
+}
+```
 # Thanks
 
 [fredericojssilva/ShowTipsView](https://github.com/fredericojssilva/ShowTipsView)

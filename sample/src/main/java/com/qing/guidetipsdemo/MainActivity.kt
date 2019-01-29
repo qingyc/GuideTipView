@@ -221,6 +221,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     }
 
 
+    /**
+     * 添加自定义布局
+     */
     private fun showCustomLayoutGuide(targetView: View) {
 
         val alphaAnimation = AlphaAnimation(.5F, 1F)
@@ -230,13 +233,16 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         alphaAnimation.interpolator = AccelerateInterpolator()
         val guideCustomLayoutForClickItem = LayoutInflater.from(this).inflate(R.layout.guide_usage_click, null, false)
         val guideTipView = GuideTipViewBuild(this, targetView)
+                .setContainerForGuide(rl_main)
                 .setClickDismissType(GuideViewDismissType.AUTO_DISMISS)
-                .setGuideCustomLayoutAndLocation(ScreenUtil.dp2px(this, -5), ScreenUtil.dp2px(this, 45), guideCustomLayoutForClickItem)
+                .setGuideCustomCenterHorizontal(ScreenUtil.dp2px(this, 45), guideCustomLayoutForClickItem)
                 .openDebug(true)
                 .setHighlightAreaIsCircle(false)
-                .setShowDashPath(false)
+                .setShowDashPath(true)
+                .setShowDashPathOffset(ScreenUtil.dp2px(this, 4).toFloat())
                 .setBgAlpha(100)
-                .setHighlightAreaAutoRadius(true)
+                .setHighlightAreaAutoRound(false)
+                .setHighlightAreaRadius(ScreenUtil.dp2px(this, 5))
                 .setClickDismissType(GuideViewDismissType.DISMISS_IN_GUIDE_TV)
                 .setOnDismissListener(object : DismissListener {
                     override fun onDismiss(guideViewDismissType: GuideViewDismissType) {

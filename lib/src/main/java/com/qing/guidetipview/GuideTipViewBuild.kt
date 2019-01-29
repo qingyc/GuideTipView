@@ -62,7 +62,7 @@ class GuideTipViewBuild(context: Context, targetView: View) {
 
 
     /**
-     * 添加自定义布局的引导提示和位置
+     * 添加自定义布局的引导提示和相对位置
      *
      * @param guideCustomLayoutDiffX  自定义布局的引导提示相对高亮控件左上 x方向相对距离
      * @param guideCustomLayoutDiffY   自定义布局的引导提示相对高亮控件左上 y方向相对距离
@@ -70,6 +70,15 @@ class GuideTipViewBuild(context: Context, targetView: View) {
      */
     fun setGuideCustomLayoutAndLocation(guideCustomLayoutDiffX: Int, guideCustomLayoutDiffY: Int, customLayout: View): GuideTipViewBuild {
         mGuideTipView.setCustomGuideLayout(guideCustomLayoutDiffX, guideCustomLayoutDiffY, customLayout)
+        return this
+    }
+
+    /**
+     * 添加自定义布局(居中显示)
+     * @param guideCustomLayoutDiffY 自定义布局相对于高亮控件左上 y方向相对距离
+     */
+    fun setGuideCustomCenterHorizontal(guideCustomLayoutDiffY: Int, customLayout: View): GuideTipViewBuild {
+        mGuideTipView.setCustomGuideLayout(guideCustomLayoutDiffY, customLayout)
         return this
     }
 
@@ -129,6 +138,14 @@ class GuideTipViewBuild(context: Context, targetView: View) {
         return this
     }
 
+    /**
+     * 点划线和高亮区边缘的偏移
+     */
+    fun setShowDashPathOffset(dashOffset: Float): GuideTipViewBuild {
+        mGuideTipView.mDashOffset = dashOffset
+        return this
+    }
+
 
     /**
      * 设置高亮区边框点划线样式(可以不设置,不设置使用一个默认的样式)
@@ -157,6 +174,14 @@ class GuideTipViewBuild(context: Context, targetView: View) {
         return this
     }
 
+    /**
+     * 设置一个padding 防止高亮区太小
+     */
+    fun setHighlightAreaPadding(highlightPadding: Int): GuideTipViewBuild {
+        mGuideTipView.mHighlightPadding = highlightPadding
+        return this
+    }
+
 
     /**
      * 设置背景透明度
@@ -177,10 +202,18 @@ class GuideTipViewBuild(context: Context, targetView: View) {
 
     /**
      * 设置高亮区域是否根据目标控件的大小自定倒圆角
-     * @param highlightAreaAutoRadius 高亮区根据需要高亮的控件的大小自动倒圆角
+     * @param highlightAreaAutoRound 高亮区根据需要高亮的控件的大小自动倒圆角
      */
-    fun setHighlightAreaAutoRadius(highlightAreaAutoRadius: Boolean = false): GuideTipViewBuild {
-        mGuideTipView.mHighlightAreaAutoRadius = highlightAreaAutoRadius
+    fun setHighlightAreaAutoRound(highlightAreaAutoRound: Boolean = false): GuideTipViewBuild {
+        mGuideTipView.mHighlightAreaAutoRound = highlightAreaAutoRound
+        return this
+    }
+
+    /**
+     * 设置高亮半径
+     */
+    fun setHighlightAreaRadius(highlightAreaUserSetRadius: Int): GuideTipViewBuild {
+        mGuideTipView.mHighlightAreaUserSetRadius = highlightAreaUserSetRadius
         return this
     }
 

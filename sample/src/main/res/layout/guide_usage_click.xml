@@ -40,7 +40,7 @@
         android:paddingTop="8dp"
         android:paddingEnd="32dp"
         android:paddingBottom="8dp"
-        android:text="hahhahhah"/>
+        android:text="customLayout des"/>
 
 
     <TextView
@@ -50,7 +50,7 @@
         android:layout_height="40dp"
         android:layout_marginTop="8dp"
         android:minWidth="168dp"
-        android:text="呵呵呵"
+        android:text="DISMISS"
         />
 
 </LinearLayout>
