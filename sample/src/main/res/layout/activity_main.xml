@@ -1,17 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:id="@+id/root_view"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@android:color/transparent"
-                android:orientation="vertical">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:id="@+id/root_view"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:background="@android:color/transparent"
+              android:orientation="vertical">
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="65dp"
         android:layout_alignParentTop="true"
         android:background="@color/colorPrimaryDark">
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="12dp"
+            android:text="1.Use in activity"
+            android:textColor="#fff"
+            android:textSize="16dp"/>
 
         <ImageView
             android:id="@+id/iv_share0"
@@ -58,52 +66,84 @@
             />
     </RelativeLayout>
 
-
     <RelativeLayout
-        android:id="@+id/rl_main"
+        android:id="@+id/ll_main"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_alignParentBottom="true"
-        android:layout_marginTop="120dp"
-        android:background="#66009900">
+        android:background="#66009900"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:id="@+id/rl_01"
+            android:layout_width="match_parent"
+            android:layout_height="65dp"
+            android:layout_alignParentTop="true"
+
+            >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="12dp"
+                android:text="2.Use In viewGroup"
+                android:textColor="#fff"
+                android:textSize="16dp"/>
+
+            <ImageView
+                android:id="@+id/iv_share4"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="14dp"
+                android:padding="8dp"
+                android:src="@drawable/img_share"/>
 
 
-        <ImageView
-            android:id="@+id/iv_share4"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_alignParentEnd="true"
-            android:layout_marginTop="20dp"
-            android:layout_marginEnd="10dp"
-            android:padding="8dp"
-            android:src="@drawable/img_share"/>
+            <ImageView
+                android:id="@+id/iv_share5"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="14dp"
+                android:layout_toStartOf="@id/iv_share4"
+                android:padding="8dp"
+                android:src="@drawable/img_share"
+                />
 
-        <ImageView
-            android:id="@+id/iv_share5"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_alignParentEnd="true"
-            android:layout_marginTop="20dp"
-            android:layout_marginEnd="50dp"
-            android:padding="8dp"
-            android:src="@drawable/img_share"/>
+            <ImageView
+                android:id="@+id/iv_share6"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="14dp"
+                android:layout_toStartOf="@id/iv_share5"
+                android:padding="8dp"
+                android:src="@drawable/img_share"
+                />
 
-        <ImageView
-            android:id="@+id/iv_share6"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_alignParentEnd="true"
-            android:layout_marginTop="20dp"
-            android:layout_marginEnd="90dp"
-            android:padding="8dp"
-            android:src="@drawable/img_share"/>
+
+        </RelativeLayout>
 
 
         <RelativeLayout
+            android:id="@+id/rl_02"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_margin="60dp"
+            android:layout_below="@+id/rl_01"
             android:background="#aaff6600">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_marginStart="12dp"
+                android:layout_marginTop="10dp"
+                android:text="3.Use CustomLayout "
+                android:textColor="#fff"
+                android:textSize="16dp"/>
 
             <Button
                 android:id="@+id/bt_custom"
@@ -111,12 +151,11 @@
                 android:layout_height="80dp"
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="100dp"
-                android:text="显示自定义布局"/>
+                android:text="customLayout guide"
+                android:textAllCaps="false"/>
         </RelativeLayout>
-
-
     </RelativeLayout>
 
 
-</RelativeLayout>
+</LinearLayout>
 

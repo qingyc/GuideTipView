@@ -1,7 +1,7 @@
 package com.qing.guidetipview
 
 /**
- * 引导显示类型
+ * 引导消失类型
  */
 enum class GuideViewDismissType {
     //点击高亮消失
@@ -13,7 +13,7 @@ enum class GuideViewDismissType {
     //点击所有区域消失
     DISMISS_IN_ALL_AREA,
     //自动消失
-    AUTO_DISMISS,
+    DISMISS_AUTO,
     //其他:自定义引导布局点击消失
-    DISMISS_BY_OTHER
+    DISMISS_OTHER
 }

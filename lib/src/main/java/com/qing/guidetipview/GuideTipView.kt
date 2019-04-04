@@ -74,7 +74,7 @@ class GuideTipView(private val mContext: Context, private val targetView: View) 
     //用户自定义半径
     var mHighlightAreaUserSetRadius = 6
     //true:显示圆形高亮区/false:矩形
-    var mHighlightAreaIsCircle = true
+    var mHighlightAreaIsCircle = false
     //高亮区和控件的padding(高亮控件太小时添加一个padding 使高亮区变大)
     var mHighlightPadding = 0
     //高亮区自动到圆角
@@ -92,8 +92,8 @@ class GuideTipView(private val mContext: Context, private val targetView: View) 
     //================= 引导显示位置 =============
     //蒙版区域(指定不是整个Activity显示引导)
     var mContainerForGuide: ViewGroup? = null
-    //bg alpha
-    var mBgAlpha = 150
+    //蒙版背景颜色 (默认70%透明度黑)
+    var mMaskBgColor = Color.parseColor("#B3000000")
 
 
     //================= 消失 =============
@@ -168,7 +168,7 @@ class GuideTipView(private val mContext: Context, private val targetView: View) 
                     if (BuildConfig.DEBUG) {
                         Log.i("GuideTipView", "DISMISS_GUIDE==== $mGuideInInSp")
                     }
-                    dismiss(GuideViewDismissType.AUTO_DISMISS)
+                    dismiss(GuideViewDismissType.DISMISS_AUTO)
                 }
             }
         }
@@ -226,6 +226,9 @@ class GuideTipView(private val mContext: Context, private val targetView: View) 
     }
 
 
+    /**
+     * 添加指引文字
+     */
     private fun addGuideTv() {
         if (!mShowGuideTv) {
             return
@@ -309,14 +312,16 @@ class GuideTipView(private val mContext: Context, private val targetView: View) 
      * 显示引导
      */
     fun show(showDelayTime: Long = 500L, dismissDelayTime: Long = -1) {
-
+        //防止多次点击重复添加引导
         if (nowShowingTargetId == targetView.id) {
             return
         }
         nowShowingTargetId = targetView.id
+
         if (dismissDelayTime != -1L) {
             this.mDismissDelayTime = dismissDelayTime
         }
+        //给引导图片添加动画
         mGuideIvAnimator?.let {
             it.setTarget(mGuideIv)
             it.start()
@@ -384,7 +389,7 @@ class GuideTipView(private val mContext: Context, private val targetView: View) 
     /**
      * 移除新手引导
      */
-    fun dismiss(guideViewDismissType: GuideViewDismissType = GuideViewDismissType.DISMISS_BY_OTHER) {
+    fun dismiss(guideViewDismissType: GuideViewDismissType = GuideViewDismissType.DISMISS_OTHER) {
         mHandler.removeCallbacksAndMessages(null)
         mDismissListener?.onDismiss(guideViewDismissType)
         try {
@@ -405,7 +410,7 @@ class GuideTipView(private val mContext: Context, private val targetView: View) 
 
                 val downX = event.x
                 val downY = event.y
-                //是够在可点击区
+                //是否在可点击区
                 var inClickArea = true
 
                 when (mClickGuideViewDismissType) {
@@ -437,7 +442,7 @@ class GuideTipView(private val mContext: Context, private val targetView: View) 
                         inClickArea = inClickAreaWidth && inClickAreaHeight
                     }
                     //点击其他(比如自定义引导布局)
-                    GuideViewDismissType.DISMISS_BY_OTHER -> {
+                    GuideViewDismissType.DISMISS_OTHER -> {
                         inClickArea = false
                     }
                     //DISMISS_FORBID_CLICK
@@ -463,22 +468,19 @@ class GuideTipView(private val mContext: Context, private val targetView: View) 
         if (width <= 0 || height <= 0) {
             return
         }
-        //1 绘制半透明背景
+        //1 绘制半透明蒙板背景
         // 设置透明背景
         val guideTipBgBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val guideTipTempCanvas = Canvas(guideTipBgBitmap)
         //画笔:设置背景蒙版和高亮区
         val guideTipPaint = Paint()
-        //背景蒙版是黑色
-        guideTipPaint.color = Color.parseColor("#000000")
-        //给黑色蒙版添加一个透明度
-        guideTipPaint.alpha = mBgAlpha
-
+        //背景蒙版颜色(带透明度)
+        guideTipPaint.color = mMaskBgColor
+        //绘制蒙板
         guideTipTempCanvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), guideTipPaint)
 
-        //2.绘制高亮区 ->从temp 上去掉了高亮区域
+        //2.绘制高亮区 ->从蒙板上去掉了高亮区域 设置画笔模式 clear
         guideTipPaint.reset()
-        guideTipPaint.color = ContextCompat.getColor(mContext, android.R.color.holo_red_dark)
         guideTipPaint.isAntiAlias = true
         guideTipPaint.xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR)
         //高亮目标控件的中心位置

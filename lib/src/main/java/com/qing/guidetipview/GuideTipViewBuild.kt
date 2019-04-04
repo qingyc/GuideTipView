@@ -4,7 +4,6 @@ import android.animation.Animator
 import android.content.Context
 import android.graphics.Color
 import android.support.annotation.DrawableRes
-import android.support.annotation.IntRange
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
@@ -66,19 +65,44 @@ class GuideTipViewBuild(context: Context, targetView: View) {
      *
      * @param guideCustomLayoutDiffX  自定义布局的引导提示相对高亮控件左上 x方向相对距离
      * @param guideCustomLayoutDiffY   自定义布局的引导提示相对高亮控件左上 y方向相对距离
-     * @param customLayout  自定义的一个view 作为显示引导
+     * @param inflateCustomLayout 自定义布局
+     * @param customLayoutAction 对自定义布局的操作  -->  : -> View?  是自定义布局中设定的点击使引导消失的view,如果返回null 那么默认为认自动消失, action为null 也默认自动消失
      */
-    fun setGuideCustomLayoutAndLocation(guideCustomLayoutDiffX: Int, guideCustomLayoutDiffY: Int, customLayout: View): GuideTipViewBuild {
-        mGuideTipView.setCustomGuideLayout(guideCustomLayoutDiffX, guideCustomLayoutDiffY, customLayout)
+    fun setGuideCustomLayoutAndLocation(guideCustomLayoutDiffX: Int, guideCustomLayoutDiffY: Int, inflateCustomLayout: View, customLayoutAction: ((customLayout: View) -> View?)? = null): GuideTipViewBuild {
+        val clickToDismissView = customLayoutAction?.invoke(inflateCustomLayout)
+        clickToDismissView?.let {
+            it.setOnClickListener {
+                mGuideTipView.dismiss()
+            }
+            mGuideTipView.mClickGuideViewDismissType = GuideViewDismissType.DISMISS_OTHER
+            mGuideTipView.mAutoDismiss = false
+        } ?: let {
+            mGuideTipView.mClickGuideViewDismissType = GuideViewDismissType.DISMISS_AUTO
+            mGuideTipView.mAutoDismiss = true
+        }
+        mGuideTipView.setCustomGuideLayout(guideCustomLayoutDiffY, inflateCustomLayout)
         return this
     }
 
     /**
      * 添加自定义布局(居中显示)
      * @param guideCustomLayoutDiffY 自定义布局相对于高亮控件左上 y方向相对距离
+     * @param inflateCustomLayout 自定义布局
+     * @param customLayoutAction 对自定义布局的操作  -->  : -> View?  是自定义布局中设定的点击使引导消失的view,如果返回null 那么默认为认自动消失, customLayoutAction 也默认自动消失
      */
-    fun setGuideCustomCenterHorizontal(guideCustomLayoutDiffY: Int, customLayout: View): GuideTipViewBuild {
-        mGuideTipView.setCustomGuideLayout(guideCustomLayoutDiffY, customLayout)
+    fun setGuideCustomCenterHorizontal(guideCustomLayoutDiffY: Int, inflateCustomLayout: View, customLayoutAction: ((customLayout: View) -> View?)? = null): GuideTipViewBuild {
+        val clickToDismissView = customLayoutAction?.invoke(inflateCustomLayout)
+        clickToDismissView?.let {
+            it.setOnClickListener {
+                mGuideTipView.dismiss()
+            }
+            mGuideTipView.mClickGuideViewDismissType = GuideViewDismissType.DISMISS_OTHER
+            mGuideTipView.mAutoDismiss = false
+        } ?: let {
+            mGuideTipView.mClickGuideViewDismissType = GuideViewDismissType.DISMISS_AUTO
+            mGuideTipView.mAutoDismiss = true
+        }
+        mGuideTipView.setCustomGuideLayout(guideCustomLayoutDiffY, inflateCustomLayout)
         return this
     }
 
@@ -115,7 +139,8 @@ class GuideTipViewBuild(context: Context, targetView: View) {
      * 设置是否自动消失 (默认4秒后自动消失)
      */
     fun setAutoDismiss(autoDismiss: Boolean): GuideTipViewBuild {
-        mGuideTipView.mAutoDismiss = autoDismiss
+        if (mGuideTipView.mCustomGuideLayout == null)
+            mGuideTipView.mAutoDismiss = autoDismiss
         return this
     }
 
@@ -124,7 +149,10 @@ class GuideTipViewBuild(context: Context, targetView: View) {
      * @param guideViewDismissType 点击哪里使新手引导消失
      */
     fun setClickDismissType(guideViewDismissType: GuideViewDismissType): GuideTipViewBuild {
-        mGuideTipView.mClickGuideViewDismissType = guideViewDismissType
+        // QTIP: 2019/4/4  如果设置了自定义引导布局,那么不可以设置点击哪个区域可以消失(因为 设置自定会布局时已经设置了)
+        if (mGuideTipView.mCustomGuideLayout == null) {
+            mGuideTipView.mClickGuideViewDismissType = guideViewDismissType
+        }
         return this
     }
 
@@ -184,10 +212,20 @@ class GuideTipViewBuild(context: Context, targetView: View) {
 
 
     /**
-     * 设置背景透明度
+     * 设置背景蒙板颜色
+     * @param mMaskBgColorStr  格式: "#80000000"
+     *
      */
-    fun setBgAlpha(@IntRange(from = 0, to = 255) bgAlpha: Int): GuideTipViewBuild {
-        mGuideTipView.mBgAlpha = bgAlpha
+    fun setMaskBgColorStr(mMaskBgColorStr: String): GuideTipViewBuild {
+        mGuideTipView.mMaskBgColor = Color.parseColor(mMaskBgColorStr)
+        return this
+    }
+
+    /**
+     * 设置背景蒙板颜色
+     */
+    fun setMaskBgColorInt(mMaskBgColorInt: Int): GuideTipViewBuild {
+        mGuideTipView.mMaskBgColor = mMaskBgColorInt
         return this
     }
 
